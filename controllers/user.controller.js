@@ -394,3 +394,26 @@ export const searchUser = async (req, res) => {
     });
   }
 };
+export const  getLoggedInUser = async(req,res)=>{
+  try {
+    const id = req.userId;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No user found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "User retrieved successfully",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+}
