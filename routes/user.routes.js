@@ -8,7 +8,7 @@ router.route("/login").post(Login);
 router.route("/logout").post(Logout);
 
 router.route("/profile/:id").get(isAuthenticated, getUserByID);
-router.route("/myprofile").get(isAuthenticated, getLoggedInUser);
+
 
 router.route("/follow/:id").post(isAuthenticated ,follow);
 router.route("/unfollow/:id").post( isAuthenticated,unfollow);
