@@ -10,16 +10,16 @@ dotenv.config();
 
 const app = express();
 
-// ✅ ADD THIS before any routes
+
 const allowedOrigins = [
-  "http://localhost:5173", // local frontend
-  "https://twitter-lite-frontend.vercel.app" // deployed frontend
+  "http://localhost:5173", 
+  "https://twitter-lite-backend.onrender.com" 
 ];
 
 app.use(
   cors({
     origin: allowedOrigins,
-    credentials: true, // for cookies if used
+    credentials: true, 
   })
 );
 
