@@ -13,7 +13,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173", 
-  "https://twitter-lite-backend.onrender.com" 
+  "https://twitter-lite-frontend.vercel.app" 
 ];
 
 app.use(
