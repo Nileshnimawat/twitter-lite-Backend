@@ -2,6 +2,8 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Tweet } from "../models/tweet.model.js";
+import cloudinary, { uploadOnCloudinary } from "../utils/cloudinary.js";
+import fs from "fs";
 
 export const SignUp = async (req, res) => {
   try {
@@ -192,59 +194,6 @@ export const unfollow = async (req, res) => {
   }
 };
 
-export const getFollowers = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const user = await User.findById(id);
-    const Followers = user.followers;
-    if (!Followers) {
-      return res.status(400).json({
-        success: false,
-        message: "followers are not found",
-      });
-    }
-    const allDetailsOffollowers = await User.find({ _id: { $in: Followers } });
-    return res.status(200).json({
-      success: true,
-      message: "followers retrival from database please wait....",
-      Followers,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      followers : allDetailsOffollowers
-    });
-  }
-};
-
-export const getFollowing = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const user = await User.findById(id);
-    const Followings = user.following;
-    if (!Followings) {
-      return res.status(400).json({
-        success: false,
-        message: "followings are not found",
-      });
-    }
-    const allDetailsOffollowing = await User.find({ _id: { $in: Followings } });
-    return res.status(200).json({
-      success: true,
-      message: "followings retrival from database please wait....",
-      Followings : allDetailsOffollowing,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
-  }
-};
-
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: req.userId } });
@@ -268,10 +217,10 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const getUserByID = async(req, res) =>{
-   try {
+export const getUserByID = async (req, res) => {
+  try {
     const id = req.params.id;
-    const user = User.findById(id);
+    const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -290,68 +239,37 @@ export const getUserByID = async(req, res) =>{
       message: "Internal Server Error",
     });
   }
-}
-
+};
 
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.userId;
-    const { name, username, email, password, image, bio } = req.body; // <-- include bio
+    const { name, bio } = req.body;
+    const files = req.files;
 
-    // Find the user
     const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Upload profile image
+    if (files.profileImage) {
+      const profileRes = await uploadOnCloudinary(files.profileImage[0].path);
+      if (profileRes) user.profileImage = profileRes.secure_url;
     }
 
-    // Check for unique username/email if changed
-    if (username && username !== user.username) {
-      const existingUsername = await User.findOne({ username });
-      if (existingUsername) {
-        return res.status(409).json({
-          success: false,
-          message: "Username already taken",
-        });
-      }
-      user.username = username;
-    }
-
-    if (email && email !== user.email) {
-      const existingEmail = await User.findOne({ email });
-      if (existingEmail) {
-        return res.status(409).json({
-          success: false,
-          message: "Email already taken",
-        });
-      }
-      user.email = email;
+    // Upload cover image
+    if (files.coverImage) {
+      const coverRes = await uploadOnCloudinary(files.coverImage[0].path);
+      if (coverRes) user.coverImage = coverRes.secure_url;
     }
 
     if (name) user.name = name;
-    if (image) user.image = image;
-    if (bio) user.bio = bio; // <-- update bio
-
-    // If password is provided, hash it
-    if (password) {
-      user.password = await bcrypt.hash(password, 10);
-    }
+    if (bio) user.bio = bio;
 
     await user.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      user,
-    });
+    res.status(200).json({ success: true, message: "Profile updated", user });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -394,7 +312,7 @@ export const searchUser = async (req, res) => {
     });
   }
 };
-export const  getLoggedInUser = async(req,res)=>{
+export const getLoggedInUser = async (req, res) => {
   try {
     const id = req.userId;
     const user = await User.findById(id);
@@ -416,4 +334,4 @@ export const  getLoggedInUser = async(req,res)=>{
       message: "Internal Server Error",
     });
   }
-}
+};

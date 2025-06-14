@@ -29,6 +29,10 @@ const tweetSchema = mongoose.Schema({
     type: Array,
     default: []
   },
+  image:{
+    type:String,
+    default:""
+  },
   comments: [commentSchema],
   likes: [{
     type: mongoose.Schema.ObjectId,

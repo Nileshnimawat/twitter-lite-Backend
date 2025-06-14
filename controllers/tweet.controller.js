@@ -1,26 +1,40 @@
 import { Tweet } from "../models/tweet.model.js";
 import { User } from "../models/user.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 
 export const createTweet = async (req, res) => {
   try {
     const userId = req.userId;
     const { description } = req.body;
+    const file = req.file;
+
     if (!description) {
       return res.status(400).json({
         success: false,
         message: "tweet should not be empty",
       });
     }
-    const userDetails = await User.findById(userId);
-    const newTweet = await new Tweet({
+
+    // Optionally, fetch only needed user fields
+    const user = await User.findById(userId).select("name username profileImage");
+
+    const newTweet = new Tweet({
       description,
       userId,
-      userDetails
+      userDetails: user, // or just userId, and use populate later
     });
+
+    if (file) {
+      const uploadRes = await uploadOnCloudinary(file.path);
+      if (uploadRes) newTweet.image = uploadRes.secure_url;
+    }
+
     await newTweet.save();
     return res.status(201).json({
       success: true,
-      message: "tweet created succesfully",
+      message: "tweet created successfully",
+      tweet: newTweet,
     });
   } catch (error) {
     console.log(error);
@@ -75,7 +89,7 @@ export const likedOrDisLike = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Tweet disliked succesfully",
-        flag:false
+        flag: false,
       });
     } else {
       //dislike
@@ -84,7 +98,7 @@ export const likedOrDisLike = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Tweet liked succesfully",
-        flag:true
+        flag: true,
       });
     }
   } catch (error) {

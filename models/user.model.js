@@ -31,8 +31,13 @@ const userSchema = mongoose.Schema({
     type: Array,
     default:[]
   },
-  image:{
-    type: String
+  profileImage:{
+    type: String,
+    default:""
+  },
+  coverImage:{
+    type: String,
+    default:""
   },
   bio:{
     type: String
