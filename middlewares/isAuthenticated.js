@@ -4,7 +4,7 @@ export const isAuthenticated = async (req, res, next) => {
   try {
     const token = req.cookies.token;
     if (!token) {
-      return res.status(402).json({
+      return res.status(401).json({
         success: false,
         message: "Unauthorized user access",
       });
@@ -12,7 +12,7 @@ export const isAuthenticated = async (req, res, next) => {
     const decode =  jwt.verify(token, process.env.SECRET_TOKEN);
 
     if (!decode) {
-      return res.status(402).json({
+      return res.status(401).json({
         success: false,
         message: "Unauthorized user access",
       });
