@@ -6,6 +6,9 @@ import UserRoute from "./routes/user.routes.js";
 import TweetRoute from "./routes/tweet.routes.js";
 import cookieParser from "cookie-parser";
 import messageRoute from "./routes/message.route.js";
+import compression from "compression";
+
+
 
 dotenv.config();
 
@@ -25,6 +28,7 @@ app.use(cors({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(compression());
 
 connectDB();
 
