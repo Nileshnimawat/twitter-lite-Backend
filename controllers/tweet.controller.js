@@ -16,13 +16,13 @@ export const createTweet = async (req, res) => {
       });
     }
 
-    // Optionally, fetch only needed user fields
+ 
     const user = await User.findById(userId).select("name username profileImage");
 
     const newTweet = new Tweet({
       description,
       userId,
-      userDetails: user, // or just userId, and use populate later
+      userDetails: user, 
     });
 
     if (file) {

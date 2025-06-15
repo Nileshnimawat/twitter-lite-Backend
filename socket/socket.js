@@ -16,13 +16,12 @@ const io = new Server(server, {
   },
 });
 
-// Mapping userId => Set of socketIds
 const userSocketMap = {};
 
 export const getRecieverSocketId = (receiverId) => {
   const socketSet = userSocketMap[receiverId];
   if (socketSet && socketSet.size > 0) {
-    return Array.from(socketSet)[0]; // Return one socket for the receiver
+    return Array.from(socketSet)[0]; 
   }
   return null;
 };
